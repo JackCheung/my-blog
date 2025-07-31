@@ -1,13 +1,13 @@
-import fs from 'fs';
-import path from 'path';
-import { Bitable } from '@feishu-sdk/client';
-import dotenv from 'dotenv';
+const fs = require('fs');
+const path = require('path');
+const { Client } = require('@larksuiteoapi/node-sdk');
+const dotenv = require('dotenv');
 
 // 加载环境变量
 dotenv.config();
 
 // 初始化飞书客户端
-const bitable = new Bitable.Client({
+const client = new Client({
   appId: process.env.FEISHU_APP_ID,
   appSecret: process.env.FEISHU_APP_SECRET,
 });
@@ -19,38 +19,21 @@ if (!fs.existsSync(postsDir)) {
 }
 
 /**
- * 获取飞书访问令牌
- */
-async function getFeishuToken() {
-  try {
-    const response = await bitable.request({
-      method: 'POST',
-      url: 'https://open.feishu.cn/open-apis/auth/v3/app_access_token/internal',
-      data: {
-        app_id: process.env.FEISHU_APP_ID,
-        app_secret: process.env.FEISHU_APP_SECRET,
-      },
-    });
-    return response.data.app_access_token;
-  } catch (error) {
-    console.error('获取飞书令牌失败:', error);
-    throw error;
-  }
-}
-
-/**
  * 从飞书获取表格数据
  */
-async function fetchTableData(token) {
+async function fetchTableData() {
   try {
-    const response = await bitable.request({
-      method: 'GET',
-      url: `https://open.feishu.cn/open-apis/bitable/v1/apps/${process.env.FEISHU_APP_TOKEN}/tables/${process.env.FEISHU_TABLE_ID}/records`,
-      headers: {
-        'Authorization': `Bearer ${token}`,
+    const response = await client.bitable.v1.appTableRecord.list({
+      path: {
+        app_token: process.env.FEISHU_APP_TOKEN,
+        table_id: process.env.FEISHU_TABLE_ID,
+      },
+      params: {
+        page_size: 100, // 一次获取100条记录
       },
     });
-    return response.data.data.items;
+    
+    return response.data.items;
   } catch (error) {
     console.error('获取表格数据失败:', error);
     throw error;
@@ -143,11 +126,8 @@ ${content}`;
  */
 async function main() {
   try {
-    console.log('获取飞书访问令牌...');
-    const token = await getFeishuToken();
-    
     console.log('从飞书获取数据...');
-    const items = await fetchTableData(token);
+    const items = await fetchTableData();
     
     console.log(`获取到 ${items.length} 条记录，开始处理...`);
     savePosts(items);
@@ -161,3 +141,4 @@ async function main() {
 
 // 执行主函数
 main();
+    

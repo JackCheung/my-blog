@@ -24,8 +24,8 @@ jobs:
       - name: 安装依赖
         run: |
           npm ci
-          # 明确安装飞书SDK（作为额外保障）
-          npm install @feishu-sdk/client dotenv
+          # 安装正确的飞书SDK
+          npm install @larksuiteoapi/node-sdk dotenv
       
       - name: 从飞书同步数据
         env:

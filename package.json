@@ -9,6 +9,8 @@
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.12.6"
+    "@larksuiteoapi/node-sdk": "^1.54.0",
+    "astro": "^5.12.6",
+    "dotenv": "^17.2.1"
   }
 }
