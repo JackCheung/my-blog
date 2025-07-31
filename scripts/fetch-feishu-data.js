@@ -21,13 +21,13 @@ page_size: 100,
 console.error (' 获取表格数据失败:', error);
 throw error;
 }
-}/**转换飞书富文本为 Markdown
+}/**转换飞书富文本为 Markdown（修正模板字符串语法）
 */
 function richtextToMarkdown (richtext) {
 if (!richtext || !Array.isArray (richtext)) return '';let markdown = '';richtext.forEach(block => {
 switch (block.type) {
 case 'paragraph':
-markdown += ${block.text}\n\n;
+markdown += ${block.text}\n\n; // 正确使用反引号
 break;
 case 'heading':
 markdown += ${'#'.repeat(block.level)} ${block.text}\n\n;
@@ -43,7 +43,7 @@ case 'code':
 markdown += \``\({block.language || ''}\n\){block.text}\n```\n\n; break; default: markdown += ${block.text || ''}\n\n`;
 }
 });return markdown;
-}/**生成默认 slug（当飞书表格中未提供时）
+}/**生成默认 slug
 */
 function generateSlug (title) {
 return title
@@ -54,29 +54,22 @@ return title
 */
 function savePosts (items) {
 items.forEach (item => {
-const fields = item.fields;// 验证并处理必要字段
-const title = fields. 标题 || 未命名文章-${Date.now()};
-// 确保 slug 存在（如果飞书没有提供则自动生成）
+const fields = item.fields;const title = fields. 标题 || 未命名文章-${Date.now()};
 const slug = fields.slug || generateSlug (title);
-// 确保日期格式正确（飞书日期可能是 ISO 字符串）
-const date = fields. 发布日期？new Date (fields. 发布日期).toISOString () : new Date ().toISOString ();// 跳过没有内容的记录
-if (!fields. 内容) {
+const date = fields. 发布日期？new Date (fields. 发布日期).toISOString () : new Date ().toISOString ();if (!fields. 内容) {
 console.log (跳过无内容的记录: ${slug});
 return;
-}// 转换富文本内容为 Markdown
-const content = richtextToMarkdown (fields. 内容);// 构建 Frontmatter（确保与 Schema 匹配）
-const frontmatter = {
+}const content = richtextToMarkdown (fields. 内容);const frontmatter = {
 title: title,
-date: date, // 存储为 ISO 格式字符串，后续会转换为 Date
+date: date,
 description: fields. 摘要 || '',
 tags: fields. 标签 || [],
-slug: slug, // 确保 slug 存在
+slug: slug,
 cover: fields. 封面图？.[0]?.url || '',
-};// 构建 Markdown 内容
+};// 构建 Markdown 内容（确保所有模板字符串用反引号）
 const markdownContent = --- ${Object.entries(frontmatter) .map(([key, value]) => { if (Array.isArray(value)) { return \({key}: [\){value.map(v => "${v}").join(', ')}]; } return \({key}: "\){value}"`;
 })
-.join('\n')}${content}`;// 保存文件
-const filePath = path.join (postsDir, ${slug}.md);
+.join('\n')}${content}`; // 正确使用反引号const filePath = path.join(postsDir, ${slug}.md);
 fs.writeFileSync(filePath, markdownContent, 'utf8');
 console.log(已保存: ${filePath});
 });
@@ -84,7 +77,15 @@ console.log(已保存: ${filePath});
 */
 async function main () {
 try {
-console.log (' 从飞书获取数据...');
+console.log (' 清理旧的文章文件...');
+if (fs.existsSync (postsDir)) {
+const files = fs.readdirSync (postsDir);
+for (const file of files) {
+if (file.endsWith ('.md')) {
+fs.unlinkSync (path.join (postsDir, file));
+}
+}
+}console.log (' 从飞书获取数据...');
 const items = await fetchTableData ();console.log(获取到 ${items.length} 条记录，开始处理...);
 savePosts(items);console.log (' 数据同步完成！');
 } catch (error) {
