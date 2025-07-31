@@ -1,12 +1,9 @@
 name: 同步数据并部署博客
 
 on:
-  # 定时触发，每天更新一次
   schedule:
     - cron: '0 0 * * *'
-  # 手动触发
   workflow_dispatch:
-  # 当main分支有推送时触发
   push:
     branches: [ main ]
 
@@ -25,7 +22,10 @@ jobs:
           cache: 'npm'
       
       - name: 安装依赖
-        run: npm ci
+        run: |
+          npm ci
+          # 明确安装飞书SDK（作为额外保障）
+          npm install @feishu-sdk/client dotenv
       
       - name: 从飞书同步数据
         env:
@@ -44,3 +44,4 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./dist
           publish_branch: gh-pages
+    
