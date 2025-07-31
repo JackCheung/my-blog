@@ -1,0 +1,37 @@
+--- const { title } = Astro.props; ---
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{title}</title>
+<!-- 可以添加全局样式或脚本 -->
+<style>
+/* 基础样式 */
+body {
+font-family: Arial, sans-serif;
+max-width: 1200px;
+margin: 0 auto;
+padding: 0 20px;
+}
+header, footer {
+padding: 20px 0;
+}
+main {
+min-height: 80vh;
+}
+</style>
+</head>
+<body>
+<header>
+<h1><a href="/">我的博客</a></h1>
+<!-- 可以添加导航菜单 -->
+</header>
+<main>
+<slot /> <!-- 页面内容会插入到这里 -->
+</main>
+<footer>
+<p>© {new Date().getFullYear()} 我的博客 | 基于Astro构建</p>
+</footer>
+</body>
+</html>
+</doubaocanvas-part></doubaocanvas>
