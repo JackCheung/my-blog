@@ -24,8 +24,12 @@ jobs:
       - name: 安装依赖
         run: |
           npm ci
-          # 安装正确的飞书SDK
+          # 安装飞书SDK
           npm install @larksuiteoapi/node-sdk dotenv
+          # 安装Astro MDX集成
+          npm install @astrojs/mdx @mdx-js/rollup --save-dev
+          # 确保sitemap集成已安装
+          npm install @astrojs/sitemap --save-dev
       
       - name: 从飞书同步数据
         env:
