@@ -1,7 +1,7 @@
-const fs = require('fs');
-const path = require('path');
-const { Client } = require('@larksuiteoapi/node-sdk');
-const dotenv = require('dotenv');
+import fs from 'fs';
+import path from 'path';
+import { Client } from '@larksuiteoapi/node-sdk';
+import dotenv from 'dotenv';
 
 // 加载环境变量
 dotenv.config();
